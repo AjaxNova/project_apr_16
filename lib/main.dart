@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import 'package:project_16_apr/controller/data_model_controller.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,55 +18,65 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class MyHomePage extends StatelessWidget {
+  MyHomePage({super.key});
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final DataModelController controller = Get.put(DataModelController());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+    return Obx(() => Scaffold(
+          appBar: AppBar(),
+          body: controller.isLoading.value
+              ? const SizedBox(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    child: SizedBox(
+                      width: 600,
+                      child: DataTable(
+                        columns: const [
+                          DataColumn(label: Text('Name')),
+                          DataColumn(label: Text('Uid')),
+                          DataColumn(label: Text('DocType')),
+                          DataColumn(label: Text('Image')),
+                        ],
+                        rows: controller.galleryItems.map((item) {
+                          return DataRow(cells: [
+                            DataCell(
+                                SizedBox(width: 50, child: Text(item.name))),
+                            DataCell(SizedBox(
+                                width: 40, child: Text(item.uid.toString()))),
+                            DataCell(SizedBox(
+                                width: 35,
+                                child: Text(
+                                  controller.getDocTypeString(item.docType),
+                                ))),
+                            DataCell(SizedBox(
+                                width: 50,
+                                height: 100,
+                                child: Image.network(item.imageUrl))),
+                          ]);
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+        ));
   }
 }
