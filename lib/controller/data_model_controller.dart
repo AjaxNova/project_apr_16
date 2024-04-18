@@ -1,14 +1,25 @@
 import 'package:get/get.dart';
 import 'package:project_16_apr/model/data_model.dart';
+import 'package:project_16_apr/model/dummy_data.dart';
 import 'package:project_16_apr/services/api_services.dart';
 
 class DataModelController extends GetxController {
   var galleryItems = <GalleryItem>[].obs;
   var isLoading = false.obs;
+  var dummyDataList = <DummyData>[].obs;
+
+  fetchDummyData() async {
+    isLoading.value = true;
+    final val = await DataService().fetchDummydata();
+    if (val != []) {
+      dummyDataList.value = val;
+    }
+    isLoading.value = false;
+  }
 
   fetchDatafromServer() async {
     isLoading.value = true;
-    final data = await makePostRequest();
+    final data = await DataService().makePostRequest();
     if (data != []) {
       galleryItems.value = data;
     }
@@ -34,7 +45,7 @@ class DataModelController extends GetxController {
 
   @override
   void onInit() {
-    fetchDatafromServer();
+    fetchDummyData();
     super.onInit();
   }
 }
